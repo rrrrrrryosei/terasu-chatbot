@@ -5,7 +5,7 @@ from vertexai.language_models import ChatModel
 st.set_page_config(page_title="てらすくん AIチャット", layout="wide")
 
 # Google Cloud の設定
-PROJECT_ID = "your-google-project-id"  # ここを自分のプロジェクト ID に変更
+PROJECT_ID = "terasu-chatbot"  # ここを自分のプロジェクト ID に変更
 
 # Vertex AI のモデルをロード
 chat_model = ChatModel.from_pretrained("chat-bison@001")
