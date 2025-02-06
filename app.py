@@ -1,37 +1,40 @@
 import streamlit as st
-from vertexai.language_models import ChatModel
-
-# Streamlit のページ設定
-st.set_page_config(page_title="てらすくん AIチャット", layout="wide")
-
-# Google Cloud の設定
-import os
 import json
 import os
-import streamlit as st
+from vertexai.language_models import ChatModel
+import vertexai
 
-# Streamlit Secrets から Google 認証情報を取得
-credentials_json = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+# ✅ Streamlit Secrets から Google 認証情報を取得
+if "GOOGLE_CREDENTIALS" in st.secrets:
+    credentials_json = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
 
-# 一時的なファイルとして保存
-with open("/tmp/gcp_credentials.json", "w") as json_file:
-    json.dump(credentials_json, json_file)
+    # 一時的なファイルとして保存
+    with open("/tmp/gcp_credentials.json", "w") as json_file:
+        json.dump(credentials_json, json_file)
 
-# 環境変数として設定
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/gcp_credentials.json"
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/mount/src/terasu-chatbot/terasu-chatbot-key.json"
-PROJECT_ID = "terasu-chatbot"  # ここを自分のプロジェクト ID に変更
+    # 環境変数として設定
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/gcp_credentials.json"
+else:
+    st.error("❌ Google Cloud の認証情報が設定されていません！")
+    st.stop()
 
-# Vertex AI のモデルをロード
+# ✅ Google Cloud のプロジェクト ID を設定
+PROJECT_ID = credentials_json["terasu-chatbot"]
+
+# ✅ Vertex AI を初期化
+vertexai.init(project=PROJECT_ID, location="us-central1")
 chat_model = ChatModel.from_pretrained("chat-bison@001")
 
-# AI チャットの関数
+# ✅ AI チャットの関数
 def chat_with_palm2(prompt):
     chat = chat_model.start_chat()
     response = chat.send_message(prompt)
     return response.text
 
-# カスタム CSS
+# ✅ Streamlit の UI
+st.set_page_config(page_title="てらすくん AIチャット", layout="wide")
+
+# ✅ カスタム CSS
 st.markdown(
     """
     <style>
@@ -64,12 +67,15 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# アプリのUI
-st.title("てらすくん AIチャット")
+# ✅ アプリの UI 設計
+st.title("てらすくん AIチャット 🤖")
 
 user_input = st.text_input("メッセージを入力してください:")
 
 if st.button("送信"):
-    response = chat_with_palm2(user_input)
-    st.markdown(f'<div class="chat-bubble user-message">{user_input}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="chat-bubble ai-message">{response}</div>', unsafe_allow_html=True)
+    if user_input:
+        response = chat_with_palm2(user_input)
+        st.markdown(f'<div class="chat-bubble user-message">{user_input}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="chat-bubble ai-message">{response}</div>', unsafe_allow_html=True)
+    else:
+        st.warning("⚠ メッセージを入力してください！")
