@@ -1,19 +1,19 @@
 import streamlit as st
-from google.cloud import aiplatform
+from vertexai.language_models import ChatModel
 
 # Streamlit のページ設定
 st.set_page_config(page_title="てらすくん AIチャット", layout="wide")
 
 # Google Cloud の設定
-PROJECT_ID = "terasu-chatbot"  # ここを自分のプロジェクトIDに変更
-aiplatform.init(project=PROJECT_ID)
+PROJECT_ID = "your-google-project-id"  # ここを自分のプロジェクト ID に変更
+
+# Vertex AI のモデルをロード
+chat_model = ChatModel.from_pretrained("chat-bison@001")
 
 # AI チャットの関数
 def chat_with_palm2(prompt):
-    response = aiplatform.generation.TextGeneration.predict(
-        model="palm2-turbo",
-        prompt=prompt
-    )
+    chat = chat_model.start_chat()
+    response = chat.send_message(prompt)
     return response.text
 
 # カスタム CSS
