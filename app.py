@@ -19,7 +19,7 @@ else:
     st.stop()
 
 # ✅ Google Cloud のプロジェクト ID を設定
-PROJECT_ID = credentials_json["terasu-chatbot"]
+PROJECT_ID = credentials_json["project_id"]
 
 # ✅ Vertex AI を初期化
 vertexai.init(project=PROJECT_ID, location="us-central1")
